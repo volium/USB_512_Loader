@@ -1,6 +1,6 @@
 """
              LUFA Library
-     Copyright (C) Dean Camera, 2014.
+     Copyright (C) Dean Camera, 2016.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
@@ -16,7 +16,7 @@
         python hid_bootloader_loader.py at90usb1287 Mouse.hex
 
     Requires the pywinusb (https://pypi.python.org/pypi/pywinusb/) and
-    IntelHex (http://bialix.com/intelhex/) libraries.
+    IntelHex (https://pypi.python.org/pypi/IntelHex/) libraries.
 """
 
 import sys
