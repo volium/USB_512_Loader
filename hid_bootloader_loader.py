@@ -15,12 +15,12 @@
     Example:
         python hid_bootloader_loader.py at90usb1287 Mouse.hex
 
-    Requires the pywinusb (https://pypi.python.org/pypi/pywinusb/) and
+    Requires cython-hidapi (https://github.com/trezor/cython-hidapi) and
     IntelHex (https://pypi.python.org/pypi/IntelHex/) libraries.
 """
 
 import sys
-from pywinusb import hid
+import hid
 from intelhex import IntelHex
 
 
@@ -38,17 +38,16 @@ device_info_map['at90usb162']  = {'page_size': 128, 'flash_kb': 16}
 device_info_map['atmega8u2']   = {'page_size': 128, 'flash_kb': 8}
 device_info_map['at90usb82']   = {'page_size': 128, 'flash_kb': 8}
 
-
-def get_hid_device_handle():
-    hid_device_filter = hid.HidDeviceFilter(vendor_id=0x03EB,
-                                            product_id=0x2067)
-
-    valid_hid_devices = hid_device_filter.get_devices()
+def get_hid_device():
+    valid_hid_devices = hid.enumerate(vendor_id=0x03EB,
+                                      product_id=0x2067)
 
     if len(valid_hid_devices) is 0:
         return None
     else:
-        return valid_hid_devices[0]
+        hid_device = hid.device()
+        hid_device.open_path(valid_hid_devices[0]['path'])
+        return hid_device
 
 
 def send_page_data(hid_device, address, data):
@@ -59,18 +58,17 @@ def send_page_data(hid_device, address, data):
     output_report_data.extend([address & 0xFF, address >> 8])
     output_report_data.extend(data)
 
-    hid_device.send_output_report(output_report_data)
+    hid_device.write(output_report_data)
 
 
 def program_device(hex_data, device_info):
-    hid_device = get_hid_device_handle()
+    hid_device = get_hid_device()
 
     if hid_device is None:
         print("No valid HID device found.")
         sys.exit(1)
 
     try:
-        hid_device.open()
         print("Connected to bootloader.")
 
         # Program in all data from the loaded HEX file, in a number of device
